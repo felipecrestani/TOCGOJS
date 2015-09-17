@@ -1,0 +1,130 @@
+﻿@model TOCLogin.Models.Cloud
+
+<script src="~/Scripts/go.js"></script>
+<script id="code">
+    function init() {
+        var $ = go.GraphObject.make;  // for conciseness in defining templates
+
+        myDiagram =
+          $(go.Diagram, "myDiagram",  // must be the ID or reference to div
+            {
+                initialContentAlignment: go.Spot.Center,
+                "clickCreatingTool.archetypeNodeData": { text: "?" },
+                "undoManager.isEnabled": true,
+                allowCopy: false,
+            });
+
+        // replace the default Node template in the nodeTemplateMap
+        myDiagram.nodeTemplate =
+              $(go.Node, "Auto",
+                new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+                $(go.Shape, "Rectangle",
+                  {
+                      fill: "white", // the default fill, if there is no data-binding
+                      portId: "", cursor: "pointer",  // the Shape is the port, not the whole Node
+                      // allow all kinds of links from and to this port
+                      fromLinkable: true, fromLinkableSelfNode: false, fromLinkableDuplicates: true,
+                      toLinkable: true, toLinkableSelfNode: false, toLinkableDuplicates: true
+                  },
+                  new go.Binding("fill", "color")),
+                $(go.TextBlock,
+                  {
+                      font: "bold 14px sans-serif",
+                      stroke: '#333',
+                      margin: 12,  // make some extra space for the shape around the text
+                      isMultiline: true,  // don't allow newlines in text
+                      editable: true  // allow in-place editing by user
+                  },
+                  new go.Binding("text", "text").makeTwoWay()),  // the label shows the node data's text
+                { // this tooltip Adornment is shared by all nodes
+                    toolTip:
+                      $(go.Adornment, "Auto",
+                        $(go.Shape, { fill: "#FFFFCC" }),
+                        $(go.TextBlock, { margin: 4 },  // the tooltip shows the result of calling nodeInfo(data)
+                          new go.Binding("text", "text"))
+                      ),
+                    // this context menu Adornment is shared by all nodes
+                }
+              );
+
+
+
+        // define the Link template
+        myDiagram.linkTemplate =
+          $(go.Link,
+            {
+                relinkableFrom: true, relinkableTo: true, corner: 5,
+            },  // allow the user to relink existing links
+            $(go.Shape,
+              { strokeWidth: 2 },
+              new go.Binding("stroke", "color")),
+            $(go.Shape,
+              { toArrow: "Standard", stroke: null },
+              new go.Binding("fill", "color")),
+            { // this tooltip Adornment is shared by all links
+                toolTip:
+                  $(go.Adornment, "Auto",
+                    $(go.Shape, { fill: "#FFFFCC" }),
+                    $(go.TextBlock, { margin: 4 },  // the tooltip shows the result of calling linkInfo(data)
+                      new go.Binding("text", ""))
+                  ),
+                // the same context menu Adornment is shared by all links
+            }
+          );
+
+        // Create the Diagram's Model:
+        var nodeDataArray = [
+            { "key": 1, "text": "Necessidade", "loc": "343.0000000000002 142.9999999999998" },
+            { "key": 2, "text": "Objetivo", "loc": "235.99999999999977 227.99999999999977" },
+            { "key": 3, "text": "Ação/Vontade", "loc": "568.9999999999994 143" },
+            { "text": "Necessidade", "key": -4, "loc": "345.9999999999998 298.9999999999998" },
+            { "text": "Ação/Vontade", "key": -5, "loc": "569 298" }
+        ];
+
+        var linkDataArray = [
+            { "from": 1, "to": 2 },
+            { "from": -4, "to": 2 },
+            { "from": -5, "to": -4 },
+            { "from": 3, "to": 1 }
+        ];
+
+        myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+    }
+
+    
+    function Save() {
+
+        var id = @Model.Id;
+        var projectid = @Model.ProjectId;
+        var nodeId = @Model.NodeId;
+        var name = $("#Name").val();
+        var treeId = @Model.TreeId;
+
+        $.ajax({
+            type: "POST",
+            url: '/Cloud/Save',
+            dataType: 'json',
+            cache: false,
+            data: { data: myDiagram.model.toJson(), id:id , projectId:projectid, nodeId:nodeId , name:name, treeId:treeId },
+            success: function (data) {
+                window.location.href = data;
+            }
+        });
+
+    }
+    
+</script>
+<br />
+
+<input type="button" class="btn btn-sm btn-default" onclick="Save()" title="Save" value="Save" />
+
+<br />
+<br />
+
+<body onload="init()">
+    <div id="sample" style="text-align:center">
+        <input type="text" id="Name" value="@Model.Name" style="font-size:x-large; text-align:center ; border:1px solid" />
+        <div id="myDiagram" style="background-color: white; width: 100%; height: 500px"></div>
+    </div>
+</body>
+

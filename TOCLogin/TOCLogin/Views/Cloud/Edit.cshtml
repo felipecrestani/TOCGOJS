@@ -1,0 +1,190 @@
+﻿@model TOCLogin.Models.CloudModelJson
+
+<script src="~/Scripts/go.js"></script>
+<script id="code">
+  function init() {
+    var $ = go.GraphObject.make;  // for conciseness in defining templates
+
+    myDiagram =
+      $(go.Diagram, "myDiagram",  // must be the ID or reference to div
+        {
+		initialContentAlignment: go.Spot.Center,
+		"clickCreatingTool.archetypeNodeData": { text: "?" },
+		"undoManager.isEnabled": true,
+          allowCopy: false
+        });
+
+    // replace the default Node template in the nodeTemplateMap
+myDiagram.nodeTemplate =
+      $(go.Node, "Auto",
+		new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+        $(go.Shape,
+			  {
+				fill: "white", // the default fill, if there is no data-binding
+				portId: "", cursor: "pointer",  // the Shape is the port, not the whole Node
+				// allow all kinds of links from and to this port
+				fromLinkable: true, fromLinkableSelfNode: false, fromLinkableDuplicates: true,
+				toLinkable: true, toLinkableSelfNode: false, toLinkableDuplicates: true
+			  },
+			  new go.Binding("fill", "color"),
+			  new go.Binding("figure", "fig"),
+			  new go.Binding("width", "width"),
+			  new go.Binding("height", "height"),
+			  new go.Binding("fromLinkable", "fromLinkable"),
+			  new go.Binding("toLinkable", "toLinkable")
+
+		  ),
+        $(go.TextBlock,
+          {
+            font: "bold 14px sans-serif",
+            stroke: '#333',
+            margin: 12,  // make some extra space for the shape around the text
+            isMultiline: true,  // don't allow newlines in text
+            editable: true  // allow in-place editing by user
+          },
+          new go.Binding("text", "text").makeTwoWay()),  // the label shows the node data's text
+
+        { // this tooltip Adornment is shared by all nodes
+          toolTip:
+            $(go.Adornment, "Auto",
+              $(go.Shape, { fill: "#FFFFCC" }),
+              $(go.TextBlock, { margin: 4 },  // the tooltip shows the result of calling nodeInfo(data)
+                new go.Binding("text", "text"))
+            ),
+			contextMenu:     // define a context menu for each node
+          $(go.Adornment, "Vertical",  // that has one button
+            $("ContextMenuButton",
+              $(go.TextBlock, "Alterar Cor"),
+              { click: changeColor }),
+			  $("ContextMenuButton",
+              $(go.TextBlock, "Editar Nuvem"),
+              { click: criarNuvem })
+			)
+			// end Adornment
+
+          // this context menu Adornment is shared by all nodes
+        }
+      );
+
+	function criarNuvem(e,obj)
+	{
+		window.open("Nuvem.html");
+	}
+
+	function changeColor(e, obj)
+	{
+		myDiagram.startTransaction("changed color");
+		// get the context menu that holds the button that was clicked
+		var contextmenu = obj.part;
+		// get the node data to which the Node is data bound
+		var nodedata = contextmenu.data;
+		// compute the next color for the node
+		var newcolor = "lightblue";
+		switch (nodedata.color) {
+		  case "lightblue": newcolor = "lightgreen"; break;
+		  case "lightgreen": newcolor = "lightyellow"; break;
+		  case "lightyellow": newcolor = "orange"; break;
+		  case "orange": newcolor = "white"; break;
+		}
+		// modify the node data
+		// this evaluates data Bindings and records changes in the UndoManager
+		myDiagram.model.setDataProperty(nodedata, "color", newcolor);
+		myDiagram.commitTransaction("changed color");
+	}
+
+	myDiagram.contextMenu =
+    $(go.Adornment, "Vertical",
+      $("ContextMenuButton",
+        $(go.TextBlock, "Novo EI"),
+        { click: function(e, obj) {
+          var diagram = e.diagram;
+          diagram.startTransaction('new node');
+          var data = { text: "?"};
+          diagram.model.addNodeData(data);
+          part = diagram.findPartForData(data);
+          part.location = diagram.toolManager.contextMenuTool.mouseDownPoint;
+          diagram.commitTransaction('new node');
+        } }),
+
+	  $("ContextMenuButton",
+        $(go.TextBlock, "Conector E"),
+        { click: function(e, obj) {
+          var diagram = e.diagram;
+          diagram.startTransaction('new ellipse');
+          var data = {fig:"Ellipse", width: 100, height: 20 , fromLinkable: false , toLinkable: false};
+          diagram.model.addNodeData(data);
+          part = diagram.findPartForData(data);
+          part.location = diagram.toolManager.contextMenuTool.mouseDownPoint;
+          diagram.commitTransaction('new ellipse');
+        } })
+    );
+
+
+    // define the Link template
+    myDiagram.linkTemplate =
+      $(go.Link,
+        {
+		relinkableFrom: true,
+		relinkableTo: true ,
+		corner: 5,
+		  resegmentable: true,
+		  relinkableFrom: true,
+		  relinkableTo: true
+          },  // allow the user to relink existing links
+        $(go.Shape,
+          { strokeWidth: 2 },
+          new go.Binding("stroke", "color")),
+        $(go.Shape,
+          { toArrow: "Standard", stroke: null },
+          new go.Binding("fill", "color")),
+        { // this tooltip Adornment is shared by all links
+          toolTip:
+            $(go.Adornment, "Auto",
+              $(go.Shape, { fill: "#FFFFCC" }),
+              $(go.TextBlock, { margin: 4 },  // the tooltip shows the result of calling linkInfo(data)
+                new go.Binding("text", ""))
+            ),
+          // the same context menu Adornment is shared by all links
+        }
+      );
+
+    var node = @Html.Raw(Model.Nodes);
+    var link = @Html.Raw(Model.Links);
+
+      myDiagram.model = new go.GraphLinksModel(node, link);
+
+  }
+
+  function Save() {
+
+      var id = @Model.Id;
+      var projectid = @Model.ProjectId;
+      var name = $("#Name").val();
+
+      $.ajax({
+          type: "POST",
+          url: '/Tree/Save',
+          dataType: 'json',
+          cache: false,
+          data: { data: myDiagram.model.toJson(), id:id , projectId:projectid , name:name },
+          success: function (data) {
+              alert("Salvo com sucesso");
+          }
+      });
+  }
+</script>
+
+<br />
+
+<input type="button" class="btn btn-sm btn-default" onclick="Save()" title="Save" value="Save" />
+
+<br />
+<br />
+
+<body onload="init()">
+    <div id="sample" style="text-align:center">
+        <input type="text" id="Name" value="@Model.Name" style="font-size:x-large; text-align:center ; border:1px;" />
+        <div id="myDiagram" style="background-color: white; width: 100%; height: 600px"></div>
+    </div>
+</body>
+
