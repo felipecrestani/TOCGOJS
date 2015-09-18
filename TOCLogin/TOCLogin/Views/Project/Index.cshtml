@@ -1,5 +1,6 @@
 ﻿@model List<TOCLogin.Models.Project>
 
+
 <h2>Projects</h2>
 
 <br />
@@ -8,37 +9,42 @@
 
 <br />
 <br />
+<div style="align-content:stretch">
+    @foreach (var item in Model)
+    {
+        <div class="panel panel-default" >
+            <div class="panel-heading clearfix" style="background-color:darkgrey">
+                <h2 class="panel-title">Project: @item.Name</h2>
+            </div>
+            <div class="panel-body">
+                <h3>
+                    <span class="glyphicon glyphicon-grain" aria-hidden="true"></span>
+                    Trees
+                    @Html.ActionLink("New", "New", "Tree", new { @projectId = @item.Id }, new { @class = "btn btn-xs btn-default" })
+                </h3>
 
-@foreach (var item in Model)
-{    
-        <div class="panel panel-default" style="width:400px" >        
-        <div class="panel-heading clearfix" style="background-color:darkgrey">
-            <h2 class="panel-title">Project: @item.Name</h2>        
-        </div>
-        <div class="panel-body">
-            <h3> 
-                <span class="glyphicon glyphicon-grain" aria-hidden="true"></span>
-                Trees
-                 @Html.ActionLink("New", "New", "Tree", new { @projectId = @item.Id }, new { @class = "btn btn-xs btn-default" })             
-            </h3>
-
-            @foreach (var tree in item.CurrentRealityTrees)
-            {
-                @Html.ActionLink(tree.Name, "Edit", "Tree", new { @id = tree.Id }, null)
+                @foreach (var tree in item.Trees)
+                {
+                    @Html.ActionLink(tree.Name, "Edit", "Tree", new { @id = tree.Id }, null)
+                    <br />
+                }
 
                 <h3>
                     <span class="glyphicon glyphicon-cloud" aria-hidden="true"></span>
                     Clouds
                     @Html.ActionLink("New", "New", "Cloud", new { @projectId = @item.Id }, new { @class = "btn btn-xs btn-default" })
-                </h3>               
-                
-                foreach (var cloud in tree.Clouds)
+                </h3>
+
+                @foreach (var cloud in item.Clouds)
                 {
                     @Html.ActionLink(cloud.Name, "Edit", "Cloud", new { @id = cloud.Id }, null)
                     <br />
                 }
-
-            }
+            </div>
         </div>
-    </div>
-}
+
+    }
+</div>
+
+
+

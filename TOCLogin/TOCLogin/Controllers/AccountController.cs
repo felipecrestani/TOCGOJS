@@ -147,11 +147,24 @@ namespace TOCLogin.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Register(RegisterViewModel model)
+        public async Task<ActionResult> Register(RegisterViewModel model, HttpPostedFileBase upload)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                byte[] picture = null;
+
+                using (var reader = new System.IO.BinaryReader(upload.InputStream))
+                {
+                    picture = reader.ReadBytes(upload.ContentLength);
+                }
+
+                var user = new ApplicationUser {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    ProfilePicture = picture
+                };
+
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

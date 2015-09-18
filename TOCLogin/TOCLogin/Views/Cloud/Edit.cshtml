@@ -55,21 +55,13 @@ myDiagram.nodeTemplate =
           $(go.Adornment, "Vertical",  // that has one button
             $("ContextMenuButton",
               $(go.TextBlock, "Alterar Cor"),
-              { click: changeColor }),
-			  $("ContextMenuButton",
-              $(go.TextBlock, "Editar Nuvem"),
-              { click: criarNuvem })
+              { click: changeColor })
 			)
 			// end Adornment
 
           // this context menu Adornment is shared by all nodes
         }
       );
-
-	function criarNuvem(e,obj)
-	{
-		window.open("Nuvem.html");
-	}
 
 	function changeColor(e, obj)
 	{
@@ -155,22 +147,24 @@ myDiagram.nodeTemplate =
 
   }
 
-  function Save() {
+    function Save() {
 
-      var id = @Model.Id;
-      var projectid = @Model.ProjectId;
-      var name = $("#Name").val();
+        var id = @Model.Id;
+        var projectid = @Model.ProjectId;
+        var nodeId = @Model.NodeId;
+        var name = $("#Name").val();
+        var treeId = @Model.TreeId;
 
-      $.ajax({
-          type: "POST",
-          url: '/Tree/Save',
-          dataType: 'json',
-          cache: false,
-          data: { data: myDiagram.model.toJson(), id:id , projectId:projectid , name:name },
-          success: function (data) {
-              alert("Salvo com sucesso");
-          }
-      });
+        $.ajax({
+            type: "POST",
+            url: '/Cloud/Save',
+            dataType: 'json',
+            cache: false,
+            data: { data: myDiagram.model.toJson(), id:id , projectId:projectid, nodeId:nodeId , name:name, treeId:treeId },
+            success: function (data) {
+                alert("Salvo com sucesso");
+            }
+        });
   }
 </script>
 

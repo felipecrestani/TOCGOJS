@@ -16,5 +16,10 @@ namespace TOCLogin.Models
             // Add custom user claims here
             return userIdentity;
         }
+
+        public string FullName { get; set; }
+        public string Company { get; set; }
+        public byte[] ProfilePicture { get; set; }
+
     }
 }

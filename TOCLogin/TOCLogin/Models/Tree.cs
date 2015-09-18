@@ -14,8 +14,6 @@ namespace TOCLogin.Models
         public string Json { get; set; }
         public int ProjectId { get; set; }
 
-        public virtual List<Cloud> Clouds { get; set; }
-
         public string CreateBy { get; set; }
         public DateTime? CreatedOn { get; set; }
         public string ModifiedBy { get; set; }

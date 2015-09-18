@@ -10,6 +10,7 @@ namespace TOCLogin.Models
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public int NodeId { get; set; }
+        public int TreeId { get; set; }
         public string Name { get; set; }
         public string Nodes { get; set; }
         public string Links { get; set; }

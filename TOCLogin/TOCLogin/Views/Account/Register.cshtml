@@ -3,14 +3,46 @@
     ViewBag.Title = "Register";
 }
 
+
+@section Scripts {
+
+@Scripts.Render("~/bundles/jquery")
+    <script type="text/javascript">
+        function readURL(input) {
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#blah').attr('src', e.target.result).show();
+                    
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+
+        }
+
+        $("#imgInp").change(function () {
+            readURL(this);
+        });
+    </script>
+}
+
 <h2>@ViewBag.Title.</h2>
 
-@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
     <h4>Create a new account.</h4>
     <hr />
     @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(m => m.FullName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control" })
+        </div>
+    </div>
     <div class="form-group">
         @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
         <div class="col-md-10">
@@ -30,12 +62,24 @@
         </div>
     </div>
     <div class="form-group">
+        @Html.Label("Picture", new { @class = "control-label col-md-2" })
+        
+        <div class="col-md-10">
+            <input type='file' id="imgInp" name="upload" data-bfi-disabled />
+        </div>
+        <div class="col-md-10">
+            <br />
+            <img id="blah" src="#" alt="picture" style="width: 200px; height: 150px;display:none" />
+        </div>
+    </div>
+
+    <br />
+
+    <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
             <input type="submit" class="btn btn-default" value="Register" />
         </div>
     </div>
+
 }
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}

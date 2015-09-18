@@ -1,16 +1,39 @@
 ﻿@using Microsoft.AspNet.Identity
+@using Microsoft.AspNet.Identity.EntityFramework;
+@using TOCLogin.Models;
+@using TOCLogin.Context;
+
 @if (Request.IsAuthenticated)
 {
+    var manager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(new TOCdb()));
+    var currentUser = manager.FindById(User.Identity.GetUserId());
+
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
     @Html.AntiForgeryToken()
 
     <ul class="nav navbar-nav navbar-right">
         <li>
-            <div class="navbar-brand navbar-brand-centered"><span class="glyphicon glyphicon-user" id="logIcon"></span></div>
+            @if (currentUser.ProfilePicture == null)
+            {
+                <div class="navbar-brand navbar-brand-centered"><span class="glyphicon glyphicon-user" id="logIcon"></span></div>
+            }
+            else
+            {
+                <div class="navbar-brand navbar-brand-centered">
+                    <img src="data:image;base64,@System.Convert.ToBase64String(currentUser.ProfilePicture)" style="max-height:35px" />
+                </div>
+            }
         </li>
         <li>
-                @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+            @if (string.IsNullOrEmpty(currentUser.FullName))
+            {
+                Html.ActionLink("Hello ", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" });
+            }
+            else
+            {
+                Html.ActionLink("Hello " + currentUser.FullName, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" });
+            }
         </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
     </ul>

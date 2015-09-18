@@ -19,12 +19,16 @@ namespace TOCLogin.Controllers
             this.db = new TOCdb();
         }
 
-        public ActionResult New(int projectId,int nodeId,int TreeId)
+        public ActionResult New(int projectId,int? nodeId,int? TreeId)
         {
             Cloud model = new Cloud();
             model.ProjectId = projectId;
-            model.NodeId = nodeId;
-            model.TreeId = TreeId;
+
+            if(nodeId.HasValue)
+                model.NodeId = nodeId.Value;
+
+            if(TreeId.HasValue)
+                model.TreeId = TreeId.Value;
 
             return View(model);
         }
@@ -69,6 +73,7 @@ namespace TOCLogin.Controllers
             result.Id = id;
             result.ProjectId = cloud.ProjectId;
             result.Name = cloud.Name;
+            result.TreeId = cloud.TreeId;
             result.Nodes = o["nodeDataArray"].ToString();
             result.Links = o["linkDataArray"].ToString();
 
