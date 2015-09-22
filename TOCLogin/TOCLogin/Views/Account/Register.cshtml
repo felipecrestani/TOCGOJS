@@ -3,7 +3,6 @@
     ViewBag.Title = "Register";
 }
 
-
 @section Scripts {
 
 @Scripts.Render("~/bundles/jquery")
@@ -14,15 +13,13 @@
                 var reader = new FileReader();
 
                 reader.onload = function (e) {
-                    $('#blah').attr('src', e.target.result).show();
+                    $('#imgPicture').attr('src', e.target.result).show();
                     
                 }
 
                 reader.readAsDataURL(input.files[0]);
             }
-
         }
-
         $("#imgInp").change(function () {
             readURL(this);
         });
@@ -69,7 +66,7 @@
         </div>
         <div class="col-md-10">
             <br />
-            <img id="blah" src="#" alt="picture" style="width: 200px; height: 150px;display:none" />
+            <img id="imgPicture" src="#" alt="picture" style="width: 200px; height: 150px;display:none" />
         </div>
     </div>
 

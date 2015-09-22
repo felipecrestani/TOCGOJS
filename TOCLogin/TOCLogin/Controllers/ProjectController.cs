@@ -7,22 +7,24 @@ using System.Web.Http;
 using System.Web.Mvc;
 using TOCLogin.Context;
 using TOCLogin.Models;
+using Microsoft.AspNet.Identity;
 
 namespace TOCLogin.Controllers
 {
     [System.Web.Mvc.Authorize]
     public class ProjectController : Controller
     {
-        private TOCdb tocDB {get; set;}
+        private TOCdb db {get; set;}
+        private string userId { get; set; }
 
         public ProjectController()
         {
-            this.tocDB = new TOCdb();
+            this.db = new TOCdb();
         }
 
         public ActionResult Index()
         {
-            var projects = this.tocDB.Project.ToList();
+            var projects = this.db.Project.ToList();
             return View(projects);
         }
 
@@ -31,10 +33,15 @@ namespace TOCLogin.Controllers
             return View();
         }
 
+        public ActionResult Edit(int projectId)
+        {
+            return View(this.db.Project.FirstOrDefault(x => x.Id == projectId));
+        }
+
         public ActionResult Save(Project form)
         {
-            this.tocDB.Project.Add(form);
-            this.tocDB.SaveChanges();
+            this.db.Project.Add(form);
+            this.db.SaveChanges();
 
             return RedirectToAction("Index");
         }

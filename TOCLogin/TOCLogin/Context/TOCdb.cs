@@ -23,14 +23,13 @@ namespace TOCLogin.Context
             return new TOCdb();
         }
 
-        public DbSet<Project> Project { get; set; }
-        public DbSet<Tree> Tree { get; set; }
-        public DbSet<Cloud> Cloud { get; set; }
+        public IDbSet<Project> Project { get; set; }
+        public IDbSet<Tree> Tree { get; set; }
+        public IDbSet<Cloud> Cloud { get; set; }
+        public IDbSet<SharedEntitie> SharedEntitie { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            // Configure Code First to ignore PluralizingTableName convention 
-            // If you keep this convention then the generated tables will have pluralized names. 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
             modelBuilder.Entity<Project>()

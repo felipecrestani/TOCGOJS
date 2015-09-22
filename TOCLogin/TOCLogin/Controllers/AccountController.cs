@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TOCLogin.Models;
+using TOCLogin.Context;
 
 namespace TOCLogin.Controllers
 {
@@ -17,15 +18,18 @@ namespace TOCLogin.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private TOCdb db;
 
         public AccountController()
         {
+            db = new TOCdb();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            db = new TOCdb();
         }
 
         public ApplicationSignInManager SignInManager
@@ -50,6 +54,20 @@ namespace TOCLogin.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public ActionResult Search(string term)
+        {
+            var lista = (from u in db.Users
+                         where u.FullName.Contains(term)
+                         select u).AsEnumerable()
+                         .Select(x => new
+                         {
+                             Fullname = x.FullName,
+                             img = Convert.ToBase64String(x.ProfilePicture)
+                         });
+
+            return Json(lista, JsonRequestBehavior.AllowGet);
         }
 
         //
